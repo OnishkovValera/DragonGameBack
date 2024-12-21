@@ -5,9 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class Is1Application {
-
 	public static void main(String[] args) {
 		SpringApplication.run(Is1Application.class, args);
 	}
-
 }

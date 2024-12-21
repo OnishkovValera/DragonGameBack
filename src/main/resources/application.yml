@@ -1,1 +1,19 @@
-spring.application.name=IS1
+spring:
+  security:
+    jwt:
+      secret-key: d503053fbecf4a7acd09a2ff1f2217817824418e311a53d60e3c9ed28172a36e
+      lifetime: 24h
+  liquibase:
+    change-log: classpath:/db/changelog/changelog-master.yaml
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/IS1
+    username: postgres
+    password: admin
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+server:
+  port: 8080
