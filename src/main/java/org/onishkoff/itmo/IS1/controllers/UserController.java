@@ -2,7 +2,7 @@ package org.onishkoff.itmo.IS1.controllers;
 
 
 import lombok.RequiredArgsConstructor;
-import org.onishkoff.itmo.IS1.dto.model.UserDto;
+import org.onishkoff.itmo.IS1.dto.model.response.UserDto;
 import org.onishkoff.itmo.IS1.service.UserService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

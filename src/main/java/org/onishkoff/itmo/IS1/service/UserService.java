@@ -2,7 +2,7 @@ package org.onishkoff.itmo.IS1.service;
 
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.login.RegisterDto;
-import org.onishkoff.itmo.IS1.dto.model.UserDto;
+import org.onishkoff.itmo.IS1.dto.model.response.UserDto;
 import org.onishkoff.itmo.IS1.model.User;
 import org.onishkoff.itmo.IS1.model.enums.Role;
 import org.onishkoff.itmo.IS1.repository.UserRepository;

@@ -1,10 +1,7 @@
 package org.onishkoff.itmo.IS1.config;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.onishkoff.itmo.IS1.model.enums.Role;
 import org.onishkoff.itmo.IS1.repository.UserRepository;
-import org.onishkoff.itmo.IS1.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -1,9 +1,6 @@
 package org.onishkoff.itmo.IS1.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -21,15 +18,24 @@ public class Person {
 
     @Id
     private long id;
+
     @NotNull
     @NotBlank
     private String name;
+
+    @Enumerated(EnumType.STRING)
     private Color eyeColor;
+
+    @Enumerated(EnumType.STRING)
     private Color hairColor;
+
     @ManyToOne
     @JoinColumn(name = "location_id")
     private Location location;
+
     @Positive
     private long weight;
+
+    @Enumerated(EnumType.STRING)
     private Country nationality;
 }
