@@ -1,7 +1,13 @@
 FROM maven:latest as build
 WORKDIR /app
+
 COPY pom.xml .
+COPY .mvn .mvn
+COPY mvnw .
+RUN mvn install
+
 COPY src ./src
+
 RUN mvn clean package -DskipTests
 
 FROM openjdk:21 as runtime

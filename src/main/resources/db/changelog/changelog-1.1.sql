@@ -1,19 +1,16 @@
-
 -- Заполнение таблицы users
 INSERT INTO users (id, name, login, password, role)
-VALUES
-    ('1','Admin User', 'admin', '$2a$10$36nYuNbgRJaFC5O3FV/aNekUFRz9Xuv/QE8/RLUA64zWZYL.aoTBi', 'ADMIN'),
-    ('2', 'Regular User', 'user1', '$2a$10$2De9Fgm61gyQ1ES.zITdyuOX/X63Q1H2JCMtRcbXmz.wrRJNQgMVC', 'USER'),
-    ('3', 'Valera', 'login', '$2a$10$2De9Fgm61gyQ1ES.zITdyuOX/X63Q1H2JCMtRcbXmz.wrRJNQgMVC', 'USER');
+VALUES ('1', 'Admin User', 'admin', '$2a$10$36nYuNbgRJaFC5O3FV/aNekUFRz9Xuv/QE8/RLUA64zWZYL.aoTBi', 'ADMIN'),
+       ('2', 'Regular User', 'user1', '$2a$10$2De9Fgm61gyQ1ES.zITdyuOX/X63Q1H2JCMtRcbXmz.wrRJNQgMVC', 'USER'),
+       ('3', 'Valera', 'login', '$2a$10$2De9Fgm61gyQ1ES.zITdyuOX/X63Q1H2JCMtRcbXmz.wrRJNQgMVC', 'USER');
 -- Заполнение таблицы coordinates
 INSERT INTO coordinates (id, x, y)
-VALUES
-    (1, 10, 0),
-    (2, 50, -100),
-    (3, 98, -460);
+VALUES (1, 10, 0),
+       (2, 50, -100),
+       (3, 98, -460);
 
 -- Заполнение таблицы dragon_cave
-INSERT INTO dragon_cave (id ,depth, number_of_treasures)
+INSERT INTO dragon_cave (id, depth, number_of_treasures)
 VALUES (1, 500.0, 100.0),
        (2, 1000.0, 200.0),
        (3, 300.0, NULL);
@@ -33,10 +30,10 @@ VALUES (1, 'John the Brave', 'BLUE', 'BLACK', 1, 80, 'FRANCE', 1),
        (3, 'Killer Joe', NULL, NULL, 3, 90, NULL, 3);
 
 -- Заполнение таблицы dragon_head
-INSERT INTO dragon_head (id, tooth_count) VALUES
-                                          (1, 50.0),
-                                          (2, 100.0),
-                                          (3, NULL);
+INSERT INTO dragon_head (id, tooth_count)
+VALUES (1, 50.0),
+       (2, 100.0),
+       (3, NULL);
 
 -- Заполнение таблицы dragon
 INSERT INTO dragon (name, coordinates_id, cave_id,

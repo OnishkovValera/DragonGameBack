@@ -1,9 +1,12 @@
 package org.onishkoff.itmo.IS1.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.repository.UserRepository;
+import org.onishkoff.itmo.IS1.util.JwtTokenUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -23,10 +26,10 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfiguration{
+public class SecurityConfiguration {
 
-    private final JwtFilter jwtFilter;
     private final UserRepository userRepository;
+    private final JwtTokenUtils jwtTokenUtils;
 
 
     @Bean
@@ -38,6 +41,7 @@ public class SecurityConfiguration{
     public UserDetailsService userDetailsService() {
         return login -> userRepository.findByLogin(login).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
+
 
 
     @Bean
@@ -53,35 +57,52 @@ public class SecurityConfiguration{
         return authenticationConfiguration.getAuthenticationManager();
 
     }
+    @Order(1)
+    @Bean
+    public SecurityFilterChain securityFilterChainForAuthetication(HttpSecurity http) throws Exception{
+        return getHttpBasicConfiguration(http)
+                .securityMatcher("api/v1/login", "api/v1/register")
+                .build();
+    }
 
+    @Order(2)
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        return getHttpBasicConfiguration(http)
+                .securityMatcher("api/v1/**")
+                .addFilterBefore(new JwtFilter(jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    public HttpSecurity getHttpBasicConfiguration(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfiguration = new CorsConfiguration();
+                    CorsConfiguration corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedOriginPatterns(List.of("*"));
                     corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(List.of("*"));
                     corsConfiguration.setAllowCredentials(true);
                     return corsConfiguration;
                 }))
+
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                /*.exceptionHandling(configurer -> configurer
+                .exceptionHandling(configurer -> configurer
                         .authenticationEntryPoint(
                                 (request, response, exception) ->
-                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED))
+                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                        )
                         .accessDeniedHandler(
                                 (request, response, exception) -> response.setStatus(HttpServletResponse.SC_FORBIDDEN)))
-*/
                 .authorizeHttpRequests(configurer -> configurer
-                        .requestMatchers("/api/v1/user/**").authenticated()
-                        .requestMatchers("/api/**").permitAll())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+                        .requestMatchers("/api/v1/login").permitAll()
+                        .anyRequest().authenticated()
+                );
+        return http;
     }
+
 }
