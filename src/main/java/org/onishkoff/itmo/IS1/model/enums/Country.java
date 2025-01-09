@@ -4,5 +4,5 @@ public enum Country {
     FRANCE,
     SPAIN,
     VATICAN,
-    JAPAN;
+    JAPAN
 }

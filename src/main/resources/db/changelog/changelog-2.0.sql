@@ -7,11 +7,4 @@ CREATE TABLE teams
 
 );
 
-CREATE TABLE team_characters
-(
-    team_id      INT NOT NULL,
-    character_id INT NOT NULL,
-    PRIMARY KEY (team_id, character_id),
-    FOREIGN KEY (team_id) REFERENCES teams (id) ON DELETE CASCADE,
-    FOREIGN KEY (character_id) REFERENCES person (id) ON DELETE CASCADE
-);
+ALTER TABLE person ADD COLUMN team_id INTEGER REFERENCES teams (id) ON DELETE SET NULL;

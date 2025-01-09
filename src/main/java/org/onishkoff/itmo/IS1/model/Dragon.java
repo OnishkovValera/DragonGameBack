@@ -9,6 +9,7 @@ import lombok.*;
 import org.onishkoff.itmo.IS1.model.enums.DragonCharacter;
 
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 @Entity
 @NoArgsConstructor
@@ -28,20 +29,20 @@ public class Dragon {
     private String name;
 
     @NotNull
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "coordinates_id")
     private Coordinates coordinates;
 
     @NotNull
     @Column(name = "creation_date")
-    private ZonedDateTime dataTime = ZonedDateTime.now();
+    private ZonedDateTime dataTime;
 
-    @ManyToOne
-    @JoinColumn(name = "cave_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "cave_id", referencedColumnName = "id")
     private DragonCave cave;
 
-    @ManyToOne
-    @JoinColumn(name = "killer_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "killer_id", referencedColumnName = "id")
     private Person person;
 
     @Positive
@@ -53,11 +54,28 @@ public class Dragon {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "character", columnDefinition = "dragon_character")
     private DragonCharacter character;
 
     @NotNull
-    @OneToOne
-    @JoinColumn(name = "head_id")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "head_id", referencedColumnName = "id")
     private DragonHead head;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    private User owner;
+
+    @Column(name = "created_at")
+    private Date createdAt;
+
+    @PrePersist
+    private void onCreate() {
+        if (createdAt == null) {
+            createdAt = new Date();
+        }
+        if (dataTime == null) {
+            dataTime = ZonedDateTime.now();
+        }
+    }
 }

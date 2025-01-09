@@ -10,7 +10,6 @@ import org.onishkoff.itmo.IS1.util.JwtTokenUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -22,7 +21,7 @@ public class UserService{
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    @Transactional
+
     public User registerUser(RegisterDto registerDto) {
         User registeredUser = User.builder()
                 .login(registerDto.getLogin())
@@ -48,7 +47,6 @@ public class UserService{
     public Optional<User> findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
-
 
 
 

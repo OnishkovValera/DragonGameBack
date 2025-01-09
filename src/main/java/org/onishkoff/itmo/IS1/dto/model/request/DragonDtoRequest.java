@@ -3,25 +3,37 @@ package org.onishkoff.itmo.IS1.dto.model.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import org.onishkoff.itmo.IS1.model.User;
 import org.onishkoff.itmo.IS1.model.enums.DragonCharacter;
 
 @Data
+@Builder
+@AllArgsConstructor
 public class DragonDtoRequest {
     @NotNull
     @NotBlank
     private String name;
+
     @NotNull
-    private Long coordinatesId;
-    private Long caveId;
+    private CoordinatesDtoRequest coordinates;
+    private CaveDtoRequest dragonCave;
     private Long personId;
+
     @Positive
     private Integer age;
     private String description;
-    private Boolean speaking;
     @NotNull
-    private DragonCharacter character;
+    private Boolean speaking;
+
+    @NotNull
+    private DragonCharacter dragonCharacter;
+
     @NotNull
     @NotBlank
-    private Long headId;
+    private DragonHeadDtoRequest dragonHead;
+
+    private User owner;
 }

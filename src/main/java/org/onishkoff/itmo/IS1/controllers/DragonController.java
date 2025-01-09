@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/v1/collection/dragon")
+@RequestMapping("api/v1/dragon")
 @RequiredArgsConstructor
 public class DragonController {
 
@@ -25,7 +25,7 @@ public class DragonController {
 
     @GetMapping
     public Page<DragonDto> getDragons(@RequestParam(defaultValue = "0") Integer pageNumber,
-                                      @RequestParam(defaultValue = "10") Integer pageSize
+                                   @RequestParam(defaultValue = "10") Integer pageSize
                                       ){
         return dragonService.getDragons(pageNumber, pageSize);
     }
