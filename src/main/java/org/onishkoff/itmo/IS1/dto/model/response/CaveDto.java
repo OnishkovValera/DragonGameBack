@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class CaveDto{
     private Long id;
-    private Long depth;
-    private Long numberOfTreasures;
+    private Double depth;
+    private Double numberOfTreasures;
 
 }

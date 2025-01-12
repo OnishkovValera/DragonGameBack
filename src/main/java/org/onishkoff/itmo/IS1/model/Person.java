@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.onishkoff.itmo.IS1.model.enums.Color;
 import org.onishkoff.itmo.IS1.model.enums.Country;
+
 import java.util.Date;
 
 @Entity
@@ -15,6 +16,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "person", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 public class Person {
 
     @Id
@@ -23,6 +25,7 @@ public class Person {
 
     @NotNull
     @NotBlank
+    @Column(unique = true)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -33,7 +36,7 @@ public class Person {
     @Column(name = "hair_color", columnDefinition = "color")
     private Color hairColor;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
 
@@ -44,20 +47,20 @@ public class Person {
     @Column(name = "nationality", columnDefinition = "country")
     private Country nationality;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "created_by", nullable = false, referencedColumnName = "id")
     private User owner;
 
     @Column(nullable = false, name = "created_at")
     private Date CreatedAt;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(columnDefinition = "team_id", referencedColumnName = "id")
-    private Teams team;
+    private Team team;
 
     @PrePersist
     private void onCreate() {
-        if(CreatedAt == null){
+        if (CreatedAt == null) {
             CreatedAt = new Date();
         }
     }

@@ -3,10 +3,11 @@ package org.onishkoff.itmo.IS1.service;
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.login.RegisterDto;
 import org.onishkoff.itmo.IS1.dto.model.response.UserDto;
+import org.onishkoff.itmo.IS1.exception.UserNotFoundException;
 import org.onishkoff.itmo.IS1.model.User;
 import org.onishkoff.itmo.IS1.model.enums.Role;
 import org.onishkoff.itmo.IS1.repository.UserRepository;
-import org.onishkoff.itmo.IS1.util.JwtTokenUtils;
+import org.onishkoff.itmo.IS1.util.Mapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService{
 
-    private final JwtTokenUtils jwtTokenUtils;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final Mapper mapper;
 
 
     public User registerUser(RegisterDto registerDto) {
@@ -49,5 +50,15 @@ public class UserService{
     }
 
 
+    public UserDto update(UserDto userDto) {
+        User updatedUser = userRepository.findByLogin(userDto.getLogin()).orElseThrow(UserNotFoundException::new);
+        updatedUser.setName(userDto.getName());
+        updatedUser.setLogin(userDto.getLogin());
+        return mapper.toUserDto(userRepository.save(updatedUser));
+    }
+
+    public User findById(Long id){
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    }
 
 }

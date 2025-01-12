@@ -29,7 +29,7 @@ public class Dragon {
     private String name;
 
     @NotNull
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "coordinates_id")
     private Coordinates coordinates;
 
@@ -37,11 +37,11 @@ public class Dragon {
     @Column(name = "creation_date")
     private ZonedDateTime dataTime;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "cave_id", referencedColumnName = "id")
     private DragonCave cave;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.PERSIST})
     @JoinColumn(name = "killer_id", referencedColumnName = "id")
     private Person person;
 
@@ -62,7 +62,7 @@ public class Dragon {
     @JoinColumn(name = "head_id", referencedColumnName = "id")
     private DragonHead head;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "created_by", referencedColumnName = "id")
     private User owner;
 

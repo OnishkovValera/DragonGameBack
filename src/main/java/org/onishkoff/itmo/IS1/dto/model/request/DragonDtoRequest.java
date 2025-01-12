@@ -13,18 +13,25 @@ import org.onishkoff.itmo.IS1.model.enums.DragonCharacter;
 @Builder
 @AllArgsConstructor
 public class DragonDtoRequest {
+
+    private Integer id;
+
     @NotNull
     @NotBlank
     private String name;
 
     @NotNull
     private CoordinatesDtoRequest coordinates;
+
     private CaveDtoRequest dragonCave;
+
     private Long personId;
 
     @Positive
     private Integer age;
+
     private String description;
+
     @NotNull
     private Boolean speaking;
 
@@ -32,8 +39,8 @@ public class DragonDtoRequest {
     private DragonCharacter dragonCharacter;
 
     @NotNull
-    @NotBlank
     private DragonHeadDtoRequest dragonHead;
 
     private User owner;
+
 }

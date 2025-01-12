@@ -2,11 +2,12 @@ package org.onishkoff.itmo.IS1.util;
 
 import org.onishkoff.itmo.IS1.dto.login.RegisterResponseDto;
 import org.onishkoff.itmo.IS1.dto.model.request.*;
-import org.onishkoff.itmo.IS1.dto.model.response.DragonDto;
-import org.onishkoff.itmo.IS1.dto.model.response.PersonDto;
-import org.onishkoff.itmo.IS1.dto.model.response.UserDto;
+import org.onishkoff.itmo.IS1.dto.model.response.*;
 import org.onishkoff.itmo.IS1.model.*;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Component
 public class Mapper {
@@ -27,7 +28,7 @@ public class Mapper {
                 .build();
     }
 
-    public Dragon toDragon(DragonDtoRequest dragonDtoRequest){
+    public Dragon toDragon(DragonDtoRequest dragonDtoRequest) {
         return Dragon.builder()
                 .name(dragonDtoRequest.getName())
                 .age(dragonDtoRequest.getAge())
@@ -53,7 +54,9 @@ public class Mapper {
     }
 
 
-    public Person toPerson(PersonDtoRequest person){
+
+
+    public Person toPerson(PersonDtoRequest person) {
         return Person.builder()
                 .name(person.getName())
                 .eyeColor(person.getEyeColor())
@@ -64,7 +67,7 @@ public class Mapper {
                 .build();
     }
 
-    public PersonDto toPersonDto(Person person){
+    public PersonDto toPersonDto(Person person) {
         return PersonDto.builder()
                 .eyeColor(person.getEyeColor())
                 .hairColor(person.getHairColor())
@@ -80,11 +83,12 @@ public class Mapper {
     }
 
 
-    public Location toLocation(LocationDtoRequest locationDtoRequest){
-        if(locationDtoRequest == null){
+    public Location toLocation(LocationDtoRequest locationDtoRequest) {
+        if (locationDtoRequest == null) {
             return null;
         }
         return Location.builder()
+                .id(locationDtoRequest.getId())
                 .x(locationDtoRequest.getX())
                 .y(locationDtoRequest.getY())
                 .z(locationDtoRequest.getZ())
@@ -92,8 +96,8 @@ public class Mapper {
     }
 
 
-    public DragonCave toDragonCave(CaveDtoRequest caveDtoRequest){
-        if(caveDtoRequest == null){
+    public DragonCave toDragonCave(CaveDtoRequest caveDtoRequest) {
+        if (caveDtoRequest == null) {
             return null;
         }
 
@@ -105,8 +109,19 @@ public class Mapper {
     }
 
 
-    public DragonHead toDragonHead(DragonHeadDtoRequest dragonHeadDtoRequest){
-        if(dragonHeadDtoRequest == null){
+    public CaveDto toCaveDto(DragonCave dragonCave) {
+        if (dragonCave == null) {
+            return null;
+        }
+        return CaveDto.builder()
+                .id(dragonCave.getId())
+                .depth(dragonCave.getDepth())
+                .numberOfTreasures(dragonCave.getNumberOfTreasures())
+                .build();
+    }
+
+    public DragonHead toDragonHead(DragonHeadDtoRequest dragonHeadDtoRequest) {
+        if (dragonHeadDtoRequest == null) {
             return null;
         }
         return DragonHead.builder()
@@ -117,9 +132,9 @@ public class Mapper {
     }
 
 
-    public Coordinates toCoordinates(CoordinatesDtoRequest coordinatesDtoRequest){
+    public Coordinates toCoordinates(CoordinatesDtoRequest coordinatesDtoRequest) {
 
-        if(coordinatesDtoRequest == null){
+        if (coordinatesDtoRequest == null) {
             return null;
         }
         return Coordinates.builder()
@@ -130,8 +145,8 @@ public class Mapper {
     }
 
 
-    public UserDto toUserDto(User user){
-        if(user == null){
+    public UserDto toUserDto(User user) {
+        if (user == null) {
             return null;
         }
         return UserDto.builder()
@@ -144,4 +159,54 @@ public class Mapper {
 
     }
 
+    public User toUser(UserDto userDto) {
+        if (userDto == null) {
+            return null;
+        }
+        return User.builder()
+                .id(userDto.getId())
+                .login(userDto.getLogin())
+                .role(userDto.getRole())
+                .name(userDto.getName())
+                .build();
+    }
+
+
+
+    public TeamDto toTeamDto(Team team) {
+        return TeamDto.builder()
+                .id(team.getId())
+                .name(team.getName())
+                .cave(toCaveDto(team.getCave()))
+                .owner(toUserDto(team.getOwner()))
+                .members(team.getMembers() != null ? (ArrayList<PersonDto>) team.getMembers().stream().map(this::toPersonDto).collect(Collectors.toList()) : null)
+                .build();
+
+    }
+
+
+
+
+    public Team toTeam(TeamDtoRequest teamDtoRequest) {
+        if (teamDtoRequest == null) {
+            return null;
+        }
+        return Team.builder()
+                .id(teamDtoRequest.getId())
+                .name(teamDtoRequest.getName())
+                .build();
+
+    }
+
+    public RequestDto toAdminRequest(AdminRequests adminRequest) {
+        return RequestDto.builder()
+                .id(adminRequest.getId())
+                .adminProcessedId(toUserDto(adminRequest.getAdminProcessedId()))
+                .status(adminRequest.getStatus())
+                .requestDate(adminRequest.getRequestDate())
+                .processedDate(adminRequest.getProcessedDate())
+                .user(toUserDto(adminRequest.getUser()))
+                .comment(adminRequest.getComment())
+                .build();
+    }
 }

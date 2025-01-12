@@ -12,6 +12,7 @@ import org.onishkoff.itmo.IS1.model.enums.Country;
 @Data
 public class PersonDtoRequest {
 
+    private Long id;
 
     @NotBlank
     @NotNull
