@@ -47,24 +47,26 @@ public class DragonService{
         if(dto.getDragonHead() != null && dto.getDragonHead().getToothCount() != null){
             dto.getDragonHead().setId(null);
         }
-        Dragon dragon = dragonRepository.save(mapper.toDragon(dto));
 
+        Dragon dragon = dragonRepository.save(mapper.toDragon(dto));
         return mapper.toDragonDto(dragon);
     }
-
     public void delete(Integer id) {
         dragonRepository.deleteById(id);
     }
 
     public DragonDto update(DragonDtoRequest dragonDto) {
-
         Coordinates coordinates = coordinateService.findCoordinatesById(dragonDto.getCoordinates().getId());
         coordinates.setX(dragonDto.getCoordinates().getX());
         coordinates.setY(dragonDto.getCoordinates().getY());
-
-        DragonCave dragonCave = dragonCaveService.findDragonCaveById(dragonDto.getDragonCave().getId());
-        dragonCave.setDepth(dragonDto.getDragonCave().getDepth());
-        dragonCave.setNumberOfTreasures(dragonDto.getDragonCave().getNumberOfTreasures());
+        DragonCave dragonCave = null;
+        if (dragonDto.getDragonCave() != null) {
+            dragonCave = dragonDto.getDragonCave().getId() == null ?
+                    new DragonCave() :
+                    dragonCaveService.findDragonCaveById(dragonDto.getDragonCave().getId());
+            dragonCave.setDepth(dragonDto.getDragonCave().getDepth());
+            dragonCave.setNumberOfTreasures(dragonDto.getDragonCave().getNumberOfTreasures());
+        }
 
         DragonHead dragonHead = dragonHeadService.findById(dragonDto.getDragonHead().getId());
         dragonHead.setToothCount(dragonDto.getDragonHead().getToothCount());
@@ -81,7 +83,7 @@ public class DragonService{
         dragonToUpdate.setCharacter(dragonDto.getDragonCharacter());
         dragonToUpdate.setHead(dragonHead);
         dragonToUpdate.setDescription(dragonDto.getDescription());
-        return mapper.toDragonDto(dragonRepository.save(mapper.toDragon(dragonDto)));
+        return mapper.toDragonDto(dragonRepository.save(dragonToUpdate));
 
     }
 }

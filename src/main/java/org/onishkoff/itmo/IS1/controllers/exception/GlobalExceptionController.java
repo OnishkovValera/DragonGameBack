@@ -50,12 +50,12 @@ public class GlobalExceptionController {
     }
 
 
-    @ExceptionHandler(NullPointerException.class)
-    public ProblemDetail nullPointerExceptionManager(){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Переданы невалидные значения");
-        problemDetail.setProperty("description", "Переданы невалидные значения");
-        return problemDetail;
-    }
+//    @ExceptionHandler(NullPointerException.class)
+//    public ProblemDetail nullPointerExceptionManager(){
+//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Переданы невалидные значения");
+//        problemDetail.setProperty("description", "Переданы невалидные значения");
+//        return problemDetail;
+//    }
 
 
     @ExceptionHandler(DataIntegrityViolationException.class)

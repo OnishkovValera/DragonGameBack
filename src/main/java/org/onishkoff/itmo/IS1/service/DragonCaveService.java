@@ -18,10 +18,17 @@ public class DragonCaveService {
         return dragonCaveRepository.findById(id).orElseThrow(DragonCaveNotFoundException::new);
     }
 
-    public DragonCave createNewCave(Double depth, Double numberOfTreasures) {
+    public DragonCave saveNewCave(Double depth, Double numberOfTreasures) {
         return dragonCaveRepository.save(DragonCave.builder()
                 .numberOfTreasures(numberOfTreasures)
                 .depth(depth)
                 .build());
+    }
+
+    public DragonCave createNewCave(Double depth, Double numberOfTreasures) {
+        return DragonCave.builder()
+                .numberOfTreasures(numberOfTreasures)
+                .depth(depth)
+                .build();
     }
 }

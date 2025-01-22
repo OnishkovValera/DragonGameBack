@@ -38,6 +38,7 @@ public class TeamService {
     public TeamDto createTeam(TeamDtoRequest teamDtoRequest) {
         ArrayList<Person> members = null;
         Team team = mapper.toTeam(teamDtoRequest);
+        team.setId(null);
         if(teamDtoRequest.getMembers() != null) {
             members = new ArrayList<>(teamDtoRequest.getMembers().stream()
                     .map(personService::findPersonById)
@@ -51,21 +52,24 @@ public class TeamService {
         team.setMembers(members);
         team.setOwner(securityUtil.getUserFromContext());
         return mapper.toTeamDto(teamRepository.save(team));
-
     }
 
     public void deleteTeam(Long teamId) {
-        teamRepository.deleteById(teamId);
+        Team team = teamRepository.findById(teamId).orElseThrow(TeamNotFoundException::new);
+        List<Person> persons = team.getMembers();
+        persons.forEach(person -> {
+            person.setTeam(null);
+            personService.save(person);
+        });
+        teamRepository.delete(team);
     }
 
-    @Transactional
+
     public TeamDto updateTeam(TeamDtoRequest teamDtoRequest) {
         Team team = teamRepository.findById(teamDtoRequest.getId()).orElseThrow(TeamNotFoundException::new);
         team.setName(teamDtoRequest.getName());
         team.setCave(updateTeamCave(teamDtoRequest));
-
         List<Person> membersToDelete = new ArrayList<>();
-
         List<Person> newMembers = teamDtoRequest.getMembers().stream().map(personService::findPersonById).toList();
         team.getMembers().forEach((member) -> {
             if (!newMembers.contains(member)) {
@@ -84,8 +88,6 @@ public class TeamService {
                 team.getMembers().add(member);
             }
         });
-        teamRepository.save(team);
-
         return mapper.toTeamDto(teamRepository.save(team));
     }
 

@@ -39,7 +39,8 @@ public class AdminRequestController {
 
     @PutMapping("/{id}")
     @PreAuthorize("@securityUtil.isAdmin()")
-    public ResponseEntity<Void> handleRequest(@PathVariable Long id, @RequestParam Status status) {
+    public ResponseEntity<Void> handleRequest(@PathVariable(name = "id") Long id, @RequestParam(name = "status") Status status) {
+        System.out.println(id + " " + status);
         requestService.handleRequest(id, status);
         return ResponseEntity.ok().build();
 

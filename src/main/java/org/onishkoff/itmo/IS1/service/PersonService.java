@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.model.request.PersonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.PersonDto;
 import org.onishkoff.itmo.IS1.exception.PersonNotFoundException;
+import org.onishkoff.itmo.IS1.model.Location;
 import org.onishkoff.itmo.IS1.model.Person;
 import org.onishkoff.itmo.IS1.repository.PersonRepository;
 import org.onishkoff.itmo.IS1.util.Mapper;
 import org.onishkoff.itmo.IS1.util.SecurityUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ public class PersonService {
     private final PersonRepository personRepository;
     private final Mapper mapper;
     private final SecurityUtil securityUtil;
+    private final LocationService locationService;
 
     public Person findPersonById(long id) {
         return personRepository.findById(id).orElseThrow(PersonNotFoundException::new);
@@ -40,7 +43,9 @@ public class PersonService {
     }
 
 
-    public Page<PersonDto> getAllPersons(Pageable pageable) {
+    public Page<PersonDto> getAllPersons(Pageable pageable, String filter) {
+        Specification<Person> specification = Specification.where(null);
+        specification.and((root, query, criteriaBuilder) -> criteriaBuilder);
         String login = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long ownerId = userService.findByLogin(login).orElseThrow(PersonNotFoundException::new).getId();
         return personRepository.findAllByOwnerId(ownerId, pageable).map(mapper::toPersonDto);
@@ -55,7 +60,7 @@ public class PersonService {
     public PersonDto update(PersonDtoRequest person) {
         Person updatedPerson = personRepository.findById(person.getId()).orElseThrow(PersonNotFoundException::new);
         updatedPerson.setName(person.getName());
-        updatedPerson.setLocation(mapper.toLocation(person.getLocation()));
+        updatedPerson.setLocation(updateLocation(person));
         updatedPerson.setEyeColor(person.getEyeColor());
         updatedPerson.setHairColor(person.getHairColor());
         updatedPerson.setNationality(person.getNationality());
@@ -69,5 +74,27 @@ public class PersonService {
     }
 
 
+    private Location updateLocation(PersonDtoRequest person) {
+        Location location = null;
+        if (person.getLocation() == null) {
+            return null;
+        }
+        if (person.getLocation().getId() == null) {
+            location = Location.builder()
+                    .x(person.getLocation().getX())
+                    .y(person.getLocation().getY())
+                    .z(person.getLocation().getZ())
+                    .build();
+
+        }else{
+            location = locationService.getLocation(person.getLocation().getId());
+            location.setX(person.getLocation().getX());
+            location.setY(person.getLocation().getY());
+            location.setZ(person.getLocation().getZ());
+        }
+
+
+        return location;
+    }
 
 }

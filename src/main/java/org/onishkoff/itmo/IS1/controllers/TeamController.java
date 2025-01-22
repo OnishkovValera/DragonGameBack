@@ -2,9 +2,7 @@ package org.onishkoff.itmo.IS1.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.model.request.TeamDtoRequest;
-import org.onishkoff.itmo.IS1.dto.model.response.PersonDto;
 import org.onishkoff.itmo.IS1.dto.model.response.TeamDto;
-import org.onishkoff.itmo.IS1.model.Team;
 import org.onishkoff.itmo.IS1.service.TeamService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/v1/team")
-public class TeamControllers {
+public class TeamController {
 
     public final TeamService teamService;
 

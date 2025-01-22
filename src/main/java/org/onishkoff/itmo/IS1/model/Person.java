@@ -54,7 +54,7 @@ public class Person {
     @Column(nullable = false, name = "created_at")
     private Date CreatedAt;
 
-    @ManyToOne(cascade = CascadeType.DETACH)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(columnDefinition = "team_id", referencedColumnName = "id")
     private Team team;
 

@@ -28,15 +28,15 @@ public class Team {
     private String name;
 
     @NotNull
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(nullable = false, name = "user_id", referencedColumnName = "id")
     private User owner;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "cave_id", referencedColumnName = "id")
     private DragonCave cave;
 
-    @OneToMany(mappedBy = "team", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @OneToMany(mappedBy = "team", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private List<Person> members;
 
 }

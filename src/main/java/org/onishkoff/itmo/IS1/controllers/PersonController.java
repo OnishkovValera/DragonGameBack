@@ -7,6 +7,7 @@ import org.onishkoff.itmo.IS1.service.PersonService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,9 +29,14 @@ public class PersonController {
     }
 
     @GetMapping()
-    public ResponseEntity<Page<PersonDto>> getAllPersons(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<PersonDto> personsPage = personService.getAllPersons(pageable);
+    public ResponseEntity<Page<PersonDto>> getAllPersons(@RequestParam(defaultValue = "0") Integer page,
+                                                         @RequestParam(defaultValue = "10") Integer size,
+                                                         @RequestParam(defaultValue = "id") String sortColumn,
+                                                         @RequestParam(defaultValue = "") String filter,
+                                                         @RequestParam(defaultValue = "asc") String order
+                                                         ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortColumn));
+        Page<PersonDto> personsPage = personService.getAllPersons(pageable, filter);
         return ResponseEntity.ok().body(personsPage);
     }
 

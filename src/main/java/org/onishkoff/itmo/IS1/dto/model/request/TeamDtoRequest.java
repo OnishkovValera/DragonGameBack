@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 @Data
 public class TeamDtoRequest {
-
     Long id;
 
     @NotNull

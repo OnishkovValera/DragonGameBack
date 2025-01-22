@@ -3,7 +3,6 @@ package org.onishkoff.itmo.IS1.dto.model.response;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.model.enums.Status;
 
 import java.util.Date;
