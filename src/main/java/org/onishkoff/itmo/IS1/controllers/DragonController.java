@@ -29,7 +29,7 @@ public class DragonController {
                                       @RequestParam(defaultValue = "id") String sortColumn,
                                       @RequestParam(defaultValue = "") String filter,
                                       @RequestParam(defaultValue = "asc") String order,
-                                      @RequestParam(defaultValue = "false") Boolean userPersonOnly
+                                      @RequestParam(defaultValue = "true") Boolean userPersonOnly
                                       ){
         return dragonService.getDragons(pageNumber, pageSize, sortColumn, filter, order, userPersonOnly);
     }

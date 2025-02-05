@@ -34,7 +34,7 @@ public class PersonController {
                                                          @RequestParam(defaultValue = "id") String sortColumn,
                                                          @RequestParam(defaultValue = "") String filter,
                                                          @RequestParam(defaultValue = "asc") String order,
-                                                         @RequestParam(defaultValue = "false") Boolean userPersonOnly
+                                                         @RequestParam(defaultValue = "true") Boolean userPersonOnly
                                                          ){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortColumn));
         Page<PersonDto> personsPage = personService.getAllPersons(pageable, filter, userPersonOnly);

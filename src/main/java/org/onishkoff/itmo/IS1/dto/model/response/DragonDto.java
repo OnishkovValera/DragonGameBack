@@ -24,5 +24,4 @@ public class DragonDto {
     private DragonCharacter dragonCharacter;
     private DragonHead dragonHead;
     private User owner;
-
 }

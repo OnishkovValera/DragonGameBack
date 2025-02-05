@@ -30,7 +30,7 @@ public class TeamController {
                                                   @RequestParam(defaultValue = "id") String sortColumn,
                                                   @RequestParam(defaultValue = "") String filter,
                                                   @RequestParam(defaultValue = "asc") String order,
-                                                  @RequestParam(defaultValue = "false") Boolean userPersonOnly
+                                                  @RequestParam(defaultValue = "true") Boolean userPersonOnly
                                                   ) {
         Page<TeamDto> teamPages = teamService.getAllTeam(page, size, sortColumn, filter, order, userPersonOnly);
         return ResponseEntity.ok().body(teamPages);

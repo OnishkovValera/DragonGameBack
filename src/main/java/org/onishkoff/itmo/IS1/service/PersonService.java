@@ -53,6 +53,8 @@ public class PersonService {
             }
             if(userPersonOnly){
                 userOnlyPredicate = criteriaBuilder.equal(root.get("owner"), securityUtil.getUserFromContext());
+            }else{
+                return filterPredicate;
             }
             return criteriaBuilder.and(filterPredicate, userOnlyPredicate);
         };

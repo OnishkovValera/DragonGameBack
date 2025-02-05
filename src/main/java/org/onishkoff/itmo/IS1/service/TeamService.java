@@ -111,13 +111,15 @@ public class TeamService {
     public Page<TeamDto> getAllTeam(Integer page, Integer size, String sortColumn, String filter, String order, Boolean userPersonOnly) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortColumn));
         Specification<Team> specification = (root, query, criteriaBuilder) -> {
-            Predicate userOnlyPredicate = criteriaBuilder.conjunction();
+            Predicate userOnlyPredicate = criteriaBuilder.disjunction();
             Predicate filterPredicate = criteriaBuilder.conjunction();
             if(filter != null && !filter.isEmpty()){
                 filterPredicate = criteriaBuilder.like(root.get("name"), "%" + filter + "%");
             }
             if(userPersonOnly){
                 userOnlyPredicate = criteriaBuilder.equal(root.get("owner"), securityUtil.getUserFromContext());
+            }else{
+                return filterPredicate;
             }
             return criteriaBuilder.and(filterPredicate, userOnlyPredicate);
         };
