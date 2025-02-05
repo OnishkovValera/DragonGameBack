@@ -2,6 +2,7 @@ package org.onishkoff.itmo.IS1.service;
 
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.model.response.RequestDto;
+import org.onishkoff.itmo.IS1.exception.AdminRequestAlreadyExists;
 import org.onishkoff.itmo.IS1.exception.AdminRequestNotFoundException;
 import org.onishkoff.itmo.IS1.model.AdminRequests;
 import org.onishkoff.itmo.IS1.model.User;
@@ -28,13 +29,17 @@ public class RequestService {
     public void addNewRequest() {
         User user = securityUtil.getUserFromContext();
         Long id = user.getId();
-        AdminRequests adminRequests = AdminRequests.builder()
-                .user(userService.findById(id))
-                .status(Status.PENDING)
-                .requestDate(new Date())
-                .build();
+        if (requestRepository.findByUser(user).isEmpty()) {
+            AdminRequests adminRequests = AdminRequests.builder()
+                    .user(userService.findById(id))
+                    .status(Status.PENDING)
+                    .requestDate(new Date())
+                    .build();
 
-        requestRepository.save(adminRequests);
+            requestRepository.save(adminRequests);
+        }else{
+            throw new AdminRequestAlreadyExists();
+        }
     }
 
     public void handleRequest(Long id, Status status) {
@@ -45,10 +50,13 @@ public class RequestService {
         adminRequests.setAdminProcessedId(user);
         adminRequests.setProcessedDate(new Date());
         requestRepository.save(adminRequests);
-
     }
 
     public List<RequestDto> getAllRequests() {
         return requestRepository.findAll().stream().map(mapper::toAdminRequest).toList();
+    }
+
+    public RequestDto getRequest() {
+        return mapper.toAdminRequest(requestRepository.findByUser((securityUtil.getUserFromContext())).orElseThrow(AdminRequestNotFoundException::new));
     }
 }

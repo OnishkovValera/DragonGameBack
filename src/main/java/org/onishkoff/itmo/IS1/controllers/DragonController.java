@@ -5,6 +5,7 @@ import org.onishkoff.itmo.IS1.dto.model.request.DragonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.DragonDto;
 import org.onishkoff.itmo.IS1.service.DragonService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +25,13 @@ public class DragonController {
 
     @GetMapping
     public Page<DragonDto> getDragons(@RequestParam(defaultValue = "0") Integer pageNumber,
-                                   @RequestParam(defaultValue = "10") Integer pageSize
+                                      @RequestParam(defaultValue = "10") Integer pageSize,
+                                      @RequestParam(defaultValue = "id") String sortColumn,
+                                      @RequestParam(defaultValue = "") String filter,
+                                      @RequestParam(defaultValue = "asc") String order,
+                                      @RequestParam(defaultValue = "false") Boolean userPersonOnly
                                       ){
-        return dragonService.getDragons(pageNumber, pageSize);
+        return dragonService.getDragons(pageNumber, pageSize, sortColumn, filter, order, userPersonOnly);
     }
 
     @PostMapping

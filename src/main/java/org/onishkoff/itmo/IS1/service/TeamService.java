@@ -1,10 +1,12 @@
 package org.onishkoff.itmo.IS1.service;
 
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.model.request.TeamDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.TeamDto;
 import org.onishkoff.itmo.IS1.exception.PersonNotFoundException;
 import org.onishkoff.itmo.IS1.exception.TeamNotFoundException;
+import org.onishkoff.itmo.IS1.model.Dragon;
 import org.onishkoff.itmo.IS1.model.DragonCave;
 import org.onishkoff.itmo.IS1.model.Person;
 import org.onishkoff.itmo.IS1.model.Team;
@@ -12,10 +14,11 @@ import org.onishkoff.itmo.IS1.repository.TeamRepository;
 import org.onishkoff.itmo.IS1.util.Mapper;
 import org.onishkoff.itmo.IS1.util.SecurityUtil;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,10 +108,20 @@ public class TeamService {
         return getTeamById(teamId);
     }
 
-    public Page<TeamDto> getAllTeam(Pageable pageable) {
-        String login = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long ownerId = userService.findByLogin(login).orElseThrow(PersonNotFoundException::new).getId();
-        return teamRepository.findAllByOwnerId(ownerId, pageable).map(mapper::toTeamDto);
+    public Page<TeamDto> getAllTeam(Integer page, Integer size, String sortColumn, String filter, String order, Boolean userPersonOnly) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortColumn));
+        Specification<Team> specification = (root, query, criteriaBuilder) -> {
+            Predicate userOnlyPredicate = criteriaBuilder.conjunction();
+            Predicate filterPredicate = criteriaBuilder.conjunction();
+            if(filter != null && !filter.isEmpty()){
+                filterPredicate = criteriaBuilder.like(root.get("name"), "%" + filter + "%");
+            }
+            if(userPersonOnly){
+                userOnlyPredicate = criteriaBuilder.equal(root.get("owner"), securityUtil.getUserFromContext());
+            }
+            return criteriaBuilder.and(filterPredicate, userOnlyPredicate);
+        };
+        return teamRepository.findAll(specification, pageable).map(mapper::toTeamDto);
     }
 
 

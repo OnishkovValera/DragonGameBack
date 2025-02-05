@@ -1,5 +1,6 @@
 package org.onishkoff.itmo.IS1.service;
 
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.model.request.PersonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.PersonDto;
@@ -12,9 +13,9 @@ import org.onishkoff.itmo.IS1.util.SecurityUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -43,18 +44,23 @@ public class PersonService {
     }
 
 
-    public Page<PersonDto> getAllPersons(Pageable pageable, String filter) {
-        Specification<Person> specification = Specification.where(null);
-        specification.and((root, query, criteriaBuilder) -> criteriaBuilder);
-        String login = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long ownerId = userService.findByLogin(login).orElseThrow(PersonNotFoundException::new).getId();
-        return personRepository.findAllByOwnerId(ownerId, pageable).map(mapper::toPersonDto);
-
+    public Page<PersonDto> getAllPersons(Pageable pageable, String filter, Boolean userPersonOnly) {
+        Specification<Person> specification = (root, query, criteriaBuilder) -> {
+            Predicate userOnlyPredicate = criteriaBuilder.conjunction();
+            Predicate filterPredicate = criteriaBuilder.conjunction();
+            if(filter != null && !filter.isEmpty()){
+                filterPredicate = criteriaBuilder.like(root.get("name"), "%" + filter + "%");
+            }
+            if(userPersonOnly){
+                userOnlyPredicate = criteriaBuilder.equal(root.get("owner"), securityUtil.getUserFromContext());
+            }
+            return criteriaBuilder.and(filterPredicate, userOnlyPredicate);
+        };
+        return personRepository.findAll(specification, pageable).map(mapper::toPersonDto);
     }
 
     public void delete(Long id) {
         personRepository.deleteById(id);
-
     }
 
     public PersonDto update(PersonDtoRequest person) {

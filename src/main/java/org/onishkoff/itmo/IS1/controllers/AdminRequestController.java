@@ -36,6 +36,11 @@ public class AdminRequestController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("!@securityUtil.isAdmin()")
+    public ResponseEntity<RequestDto> getUserRequest(){
+        return ResponseEntity.ok(requestService.getRequest());
+    }
 
     @PutMapping("/{id}")
     @PreAuthorize("@securityUtil.isAdmin()")

@@ -23,6 +23,7 @@ public class Mapper {
                 .coordinates(dragon.getCoordinates())
                 .description(dragon.getDescription())
                 .dragonCharacter(dragon.getCharacter())
+                .owner(dragon.getOwner())
                 .creationDateTime(dragon.getDataTime())
                 .speaking(dragon.getSpeaking())
                 .build();
@@ -171,8 +172,6 @@ public class Mapper {
                 .build();
     }
 
-
-
     public TeamDto toTeamDto(Team team) {
         return TeamDto.builder()
                 .id(team.getId())
@@ -183,9 +182,6 @@ public class Mapper {
                 .build();
 
     }
-
-
-
 
     public Team toTeam(TeamDtoRequest teamDtoRequest) {
         if (teamDtoRequest == null) {
@@ -209,4 +205,5 @@ public class Mapper {
                 .comment(adminRequest.getComment())
                 .build();
     }
+
 }

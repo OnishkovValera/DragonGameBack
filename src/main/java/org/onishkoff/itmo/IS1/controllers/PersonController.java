@@ -33,10 +33,11 @@ public class PersonController {
                                                          @RequestParam(defaultValue = "10") Integer size,
                                                          @RequestParam(defaultValue = "id") String sortColumn,
                                                          @RequestParam(defaultValue = "") String filter,
-                                                         @RequestParam(defaultValue = "asc") String order
-                                                         ) {
+                                                         @RequestParam(defaultValue = "asc") String order,
+                                                         @RequestParam(defaultValue = "false") Boolean userPersonOnly
+                                                         ){
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortColumn));
-        Page<PersonDto> personsPage = personService.getAllPersons(pageable, filter);
+        Page<PersonDto> personsPage = personService.getAllPersons(pageable, filter, userPersonOnly);
         return ResponseEntity.ok().body(personsPage);
     }
 
