@@ -17,7 +17,7 @@ public class DragonDto {
     private Coordinates coordinates;
     private ZonedDateTime creationDateTime;
     private DragonCave dragonCave;
-    private Person person;
+    private PersonDto person;
     private Integer age;
     private String description;
     private Boolean speaking;

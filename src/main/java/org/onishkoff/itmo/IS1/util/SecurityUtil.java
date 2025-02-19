@@ -22,6 +22,7 @@ public class SecurityUtil{
     }
 
     public Boolean hasAccess(Long ownerId){
+        System.out.println(123213123);
         User user = getUserFromContext();
         return user.getId().equals(ownerId) || user.getRole().equals(Role.ADMIN);
 

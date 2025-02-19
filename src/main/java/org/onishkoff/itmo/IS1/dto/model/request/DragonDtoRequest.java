@@ -25,7 +25,7 @@ public class DragonDtoRequest {
 
     private CaveDtoRequest dragonCave;
 
-    private Long personId;
+    private PersonDtoRequest person;
 
     @Positive
     private Integer age;

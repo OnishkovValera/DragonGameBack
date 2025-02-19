@@ -1,8 +1,10 @@
 package org.onishkoff.itmo.IS1.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.onishkoff.itmo.IS1.dto.model.request.DragonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.request.PersonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.PersonDto;
+import org.onishkoff.itmo.IS1.service.DragonService;
 import org.onishkoff.itmo.IS1.service.PersonService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,12 +16,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/person")
 @RequiredArgsConstructor
 public class PersonController {
 
     private final PersonService personService;
+    private final DragonService dragonService;
 
     @PostMapping()
     public ResponseEntity<PersonDto> createPerson(@RequestBody @Validated PersonDtoRequest person) {
@@ -57,7 +64,6 @@ public class PersonController {
     @PreAuthorize("@securityUtil.hasAccess(@personService.findPersonById(#person.getId()).getOwner().getId())")
     public ResponseEntity<PersonDto> updatePerson(@RequestBody @Validated PersonDtoRequest person) {
         return ResponseEntity.ok().body(personService.update(person));
-
     }
 
 

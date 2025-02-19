@@ -19,7 +19,7 @@ public class Mapper {
                 .age(dragon.getAge())
                 .dragonCave(dragon.getCave())
                 .dragonHead(dragon.getHead())
-                .person(dragon.getPerson())
+                .person(toPersonDto(dragon.getPerson()))
                 .coordinates(dragon.getCoordinates())
                 .description(dragon.getDescription())
                 .dragonCharacter(dragon.getCharacter())
@@ -34,6 +34,7 @@ public class Mapper {
                 .name(dragonDtoRequest.getName())
                 .age(dragonDtoRequest.getAge())
                 .owner(dragonDtoRequest.getOwner())
+                .person(toPerson(dragonDtoRequest.getPerson()))
                 .cave(toDragonCave(dragonDtoRequest.getDragonCave()))
                 .head(toDragonHead(dragonDtoRequest.getDragonHead()))
                 .coordinates(toCoordinates(dragonDtoRequest.getCoordinates()))
@@ -69,6 +70,7 @@ public class Mapper {
     }
 
     public PersonDto toPersonDto(Person person) {
+        if(person == null) return null;
         return PersonDto.builder()
                 .eyeColor(person.getEyeColor())
                 .hairColor(person.getHairColor())

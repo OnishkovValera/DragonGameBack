@@ -3,12 +3,17 @@ package org.onishkoff.itmo.IS1.controllers;
 import lombok.RequiredArgsConstructor;
 import org.onishkoff.itmo.IS1.dto.model.request.DragonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.DragonDto;
+import org.onishkoff.itmo.IS1.model.UploadHistory;
 import org.onishkoff.itmo.IS1.service.DragonService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -51,5 +56,28 @@ public class DragonController {
         return dragonService.update(dragonDto);
     }
 
+
+    @PostMapping(path = "/file_upload")
+    public ResponseEntity<UploadHistory> massiveUploadDragons(@RequestPart(value = "file") MultipartFile file){
+        return ResponseEntity.ok(dragonService.fileUpload(file));
+    }
+
+    @GetMapping("/group_by_killer")
+    public ResponseEntity<Map<String, Integer>> groupByKiller(){
+        return ResponseEntity.ok(dragonService.groupDragonsByKiller());
+    }
+
+    @GetMapping("/filter_by_tooth")
+    public ResponseEntity<List<DragonDto>> filterByTooth(@RequestParam(name = "toothCount", defaultValue = "0") Integer toothCount){
+        if(toothCount == null){
+            toothCount = 0;
+        }
+        return ResponseEntity.ok(dragonService.filterByTooth(toothCount));
+    }
+
+    @GetMapping("/get_by_speaking")
+    public ResponseEntity<List<DragonDto>> getBySpeaking(@RequestParam(value = "speaking") Boolean speaking){
+        return ResponseEntity.ok(dragonService.getBySpeaking(speaking));
+    }
 
 }

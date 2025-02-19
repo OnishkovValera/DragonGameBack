@@ -1,7 +1,13 @@
 package org.onishkoff.itmo.IS1.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.onishkoff.itmo.IS1.dto.model.request.DragonDtoRequest;
 import org.onishkoff.itmo.IS1.dto.model.response.DragonDto;
 import org.onishkoff.itmo.IS1.exception.DragonNotFoundException;
@@ -14,13 +20,23 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.net.ConnectException;
+import java.sql.SQLException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class DragonService{
+public class DragonService {
 
+    private final Validator validator;
+    private final ObjectMapper objectMapper;
     private final DragonRepository dragonRepository;
     private final Mapper mapper;
     private final SecurityUtil securityUtil;
@@ -28,27 +44,30 @@ public class DragonService{
     private final CoordinateService coordinateService;
     private final DragonCaveService dragonCaveService;
     private final DragonHeadService dragonHeadService;
+    private final ObjectStorageService objectStorageService;
+    private final UploadHistoryService uploadHistoryService;
 
-    public DragonDto getDragonDto(int id){
+
+    public DragonDto getDragonDto(int id) {
         return mapper.toDragonDto(dragonRepository.findById(id).orElseThrow());
     }
 
-    public Dragon getDragon(Integer id){
+    public Dragon getDragon(Integer id) {
         return dragonRepository.findById(id).orElseThrow(DragonNotFoundException::new);
     }
 
 
-    public Page<DragonDto> getDragons(Integer page, Integer size,String sortColumn, String filter, String order, Boolean userPersonOnly){
+    public Page<DragonDto> getDragons(Integer page, Integer size, String sortColumn, String filter, String order, Boolean userPersonOnly) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortColumn));
         Specification<Dragon> specification = (root, query, criteriaBuilder) -> {
             Predicate userOnlyPredicate = criteriaBuilder.disjunction();
             Predicate filterPredicate = criteriaBuilder.conjunction();
-            if(filter != null && !filter.isEmpty()){
+            if (filter != null && !filter.isEmpty()) {
                 filterPredicate = criteriaBuilder.like(root.get("name"), "%" + filter + "%");
             }
-            if(userPersonOnly){
+            if (userPersonOnly) {
                 userOnlyPredicate = criteriaBuilder.equal(root.get("owner"), securityUtil.getUserFromContext());
-            }else{
+            } else {
                 return filterPredicate;
             }
             return criteriaBuilder.and(filterPredicate, userOnlyPredicate);
@@ -57,24 +76,29 @@ public class DragonService{
         return rawPages.map(mapper::toDragonDto);
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public DragonDto createDragon(DragonDtoRequest dto) {
         dto.setOwner(securityUtil.getUserFromContext());
-        if(dto.getDragonHead() != null && dto.getDragonHead().getToothCount() != null){
+        if (dto.getDragonHead() != null && dto.getDragonHead().getToothCount() != null) {
             dto.getDragonHead().setId(null);
         }
 
         Dragon dragon = dragonRepository.save(mapper.toDragon(dto));
         return mapper.toDragonDto(dragon);
     }
+
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void delete(Integer id) {
         dragonRepository.deleteById(id);
     }
+
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
 
     public DragonDto update(DragonDtoRequest dragonDto) {
         Coordinates coordinates = coordinateService.findCoordinatesById(dragonDto.getCoordinates().getId());
         coordinates.setX(dragonDto.getCoordinates().getX());
         coordinates.setY(dragonDto.getCoordinates().getY());
+
         DragonCave dragonCave = null;
         if (dragonDto.getDragonCave() != null) {
             dragonCave = dragonDto.getDragonCave().getId() == null ?
@@ -93,13 +117,101 @@ public class DragonService{
         dragonToUpdate.setAge(dragonDto.getAge());
         dragonToUpdate.setSpeaking(dragonDto.getSpeaking());
         dragonToUpdate.setCave(dragonCave);
-        if (dragonDto.getPersonId() != null) {
-            dragonToUpdate.setPerson(personService.findPersonById(dragonDto.getPersonId()));
+        System.out.println("Check person");
+        if (dragonDto.getPerson() != null) {
+            System.out.println(personService.findPersonById(dragonDto.getPerson().getId()));
+            dragonToUpdate.setPerson(personService.findPersonById(dragonDto.getPerson().getId()));
         }
         dragonToUpdate.setCharacter(dragonDto.getDragonCharacter());
         dragonToUpdate.setHead(dragonHead);
         dragonToUpdate.setDescription(dragonDto.getDescription());
         return mapper.toDragonDto(dragonRepository.save(dragonToUpdate));
 
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public UploadHistory fileUpload(MultipartFile file) {
+        try {
+            UploadHistory uploadHistory = uploadHistoryService.createEmptyUpload();
+            if (file.isEmpty() || file.getOriginalFilename() == null) {
+                throw new FileUploadException("File is empty");
+            }
+
+            String objectUrl;
+            List<DragonDtoRequest> dragonDtoList = objectMapper.readValue(file.getInputStream(), new TypeReference<>() {
+            });
+            for (DragonDtoRequest dragonDto : dragonDtoList) {
+                Set<ConstraintViolation<DragonDtoRequest>> constraintViolations = validator.validate(dragonDto);
+                if (!constraintViolations.isEmpty()) {
+                    for(ConstraintViolation<DragonDtoRequest> constraintViolation : constraintViolations) {
+                        System.out.println(constraintViolation.getMessage());
+                    }
+                    throw new ValidationException("Validation failed");
+                }
+                dragonDto.setOwner(securityUtil.getUserFromContext());
+                dragonRepository.save(mapper.toDragon(dragonDto));
+            }
+
+
+            try {
+                objectUrl = objectStorageService.uploadFile(file, uploadHistory.getId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("123");
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "File upload failed");
+            }
+
+            uploadHistory.setObjectUrl(objectUrl);
+            uploadHistory.setIsSuccess(Boolean.TRUE);
+            uploadHistoryService.addNewUpload(uploadHistory);
+            return uploadHistory;
+        } catch (ConnectException e) {
+            System.out.println(1);
+            uploadHistoryService.addBadUpload(UploadHistory.builder()
+                    .objectUrl("")
+                    .user(securityUtil.getUserFromContext())
+                    .isSuccess(Boolean.FALSE)
+                    .build());
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Object storage is not available");
+        } catch (Exception e) {
+            Throwable rootCause = com.google.common.base.Throwables.getRootCause(e);
+            if (rootCause instanceof SQLException) {
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Database is not available");
+            }
+
+            uploadHistoryService.addBadUpload(
+                    UploadHistory.builder()
+                    .objectUrl("")
+                    .user(securityUtil.getUserFromContext())
+                    .isSuccess(Boolean.FALSE)
+                    .build());
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Failed to upload file: " + e.getMessage());
+        }
+    }
+
+
+    public Map<String, Integer> groupDragonsByKiller() {
+        List<Dragon> dragons = dragonRepository.findAll();
+        Map<String, Integer> dragonsByKiller = new HashMap<>();
+        for(Dragon dragon : dragons) {
+            if(dragon.getPerson() == null) continue;
+            if(!dragonsByKiller.containsKey(dragon.getPerson().getName())) {
+                dragonsByKiller.put(dragon.getPerson().getName(), 1);
+            }else{
+                dragonsByKiller.put(dragon.getPerson().getName(), dragonsByKiller.get(dragon.getPerson().getName()) + 1);
+            }
+        }
+        return dragonsByKiller;
+
+    }
+
+
+    public List<DragonDto> filterByTooth(Integer toothCount) {
+        return dragonRepository.findAll().stream().filter(dragon -> dragon.getHead().getToothCount() < toothCount).map(mapper::toDragonDto).toList();
+    }
+
+
+    public List<DragonDto> getBySpeaking(boolean speaking) {
+        return dragonRepository.findAllBySpeaking(speaking).stream().map(mapper::toDragonDto).toList();
     }
 }

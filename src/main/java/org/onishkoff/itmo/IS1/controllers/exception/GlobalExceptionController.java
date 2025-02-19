@@ -2,6 +2,7 @@ package org.onishkoff.itmo.IS1.controllers.exception;
 
 
 import io.jsonwebtoken.ExpiredJwtException;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.onishkoff.itmo.IS1.exception.BaseException;
 import org.onishkoff.itmo.IS1.exception.DragonNotFoundException;
@@ -12,10 +13,17 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+
 
 @RestControllerAdvice
 public class GlobalExceptionController {
 
+
+//    @ExceptionHandler(FileUploadException.class)
+//    public ProblemDetail fileNotValid(FileUploadException e) {
+//        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+//    }
 
     @ExceptionHandler(WrongPasswordException.class)
     public ProblemDetail wrongPasswordExceptionManager(WrongPasswordException exception){
@@ -23,7 +31,6 @@ public class GlobalExceptionController {
         problemDetail.setProperty("description", "Введен неправильный пароль");
         return problemDetail;
     }
-
 
     @ExceptionHandler(ExpiredJwtException.class)
     public ProblemDetail expiredJwtExceptionManager(ExpiredJwtException exception){
@@ -57,6 +64,11 @@ public class GlobalExceptionController {
 //        return problemDetail;
 //    }
 
+//    @ExceptionHandler(HttpClientErrorException.class)
+//    public ProblemDetail httpClientErrorExceptionManager(HttpClientErrorException exception){
+//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(exception.getStatusCode(), exception.getMessage());
+//        return problemDetail;
+//    }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {

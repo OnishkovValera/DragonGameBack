@@ -20,3 +20,12 @@ logging:
     org.springframework.security: DEBUG
 server:
   port: 8080
+
+minio:
+  url: http://localhost:9000
+  bucket:
+    name: isdata
+  access:
+    name: minioadmin
+    secret: minioadmin
+
