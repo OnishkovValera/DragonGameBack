@@ -19,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +33,12 @@ public class TeamService {
     private final SecurityUtil securityUtil;
     public final Mapper mapper;
     private final DragonCaveService dragonCaveService;
-    private final UserService userService;
 
     public TeamDto getTeamById(Long id) {
         return mapper.toTeamDto(teamRepository.findById(id).orElseThrow(TeamNotFoundException::new));
     }
 
-
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public TeamDto createTeam(TeamDtoRequest teamDtoRequest) {
         ArrayList<Person> members = null;
         Team team = mapper.toTeam(teamDtoRequest);
@@ -57,6 +58,7 @@ public class TeamService {
         return mapper.toTeamDto(teamRepository.save(team));
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
     public void deleteTeam(Long teamId) {
         Team team = teamRepository.findById(teamId).orElseThrow(TeamNotFoundException::new);
         List<Person> persons = team.getMembers();
@@ -67,7 +69,7 @@ public class TeamService {
         teamRepository.delete(team);
     }
 
-
+    @Transactional(isolation = Isolation.SERIALIZABLE, rollbackFor = Exception.class)
     public TeamDto updateTeam(TeamDtoRequest teamDtoRequest) {
         Team team = teamRepository.findById(teamDtoRequest.getId()).orElseThrow(TeamNotFoundException::new);
         team.setName(teamDtoRequest.getName());

@@ -5,7 +5,6 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.*;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.onishkoff.itmo.IS1.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

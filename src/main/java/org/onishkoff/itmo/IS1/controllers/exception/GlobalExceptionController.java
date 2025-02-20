@@ -2,7 +2,6 @@ package org.onishkoff.itmo.IS1.controllers.exception;
 
 
 import io.jsonwebtoken.ExpiredJwtException;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.onishkoff.itmo.IS1.exception.BaseException;
 import org.onishkoff.itmo.IS1.exception.DragonNotFoundException;
@@ -20,10 +19,6 @@ import org.springframework.web.client.HttpClientErrorException;
 public class GlobalExceptionController {
 
 
-//    @ExceptionHandler(FileUploadException.class)
-//    public ProblemDetail fileNotValid(FileUploadException e) {
-//        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-//    }
 
     @ExceptionHandler(WrongPasswordException.class)
     public ProblemDetail wrongPasswordExceptionManager(WrongPasswordException exception){
@@ -57,18 +52,18 @@ public class GlobalExceptionController {
     }
 
 
-//    @ExceptionHandler(NullPointerException.class)
-//    public ProblemDetail nullPointerExceptionManager(){
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Переданы невалидные значения");
-//        problemDetail.setProperty("description", "Переданы невалидные значения");
-//        return problemDetail;
-//    }
+    @ExceptionHandler(NullPointerException.class)
+    public ProblemDetail nullPointerExceptionManager(){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Переданы невалидные значения");
+        problemDetail.setProperty("description", "Переданы невалидные значения");
+        return problemDetail;
+    }
 
-//    @ExceptionHandler(HttpClientErrorException.class)
-//    public ProblemDetail httpClientErrorExceptionManager(HttpClientErrorException exception){
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(exception.getStatusCode(), exception.getMessage());
-//        return problemDetail;
-//    }
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ProblemDetail httpClientErrorExceptionManager(HttpClientErrorException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(exception.getStatusCode(), exception.getMessage());
+        return problemDetail;
+    }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {

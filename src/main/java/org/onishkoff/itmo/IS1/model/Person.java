@@ -36,7 +36,7 @@ public class Person {
     @Column(name = "hair_color", columnDefinition = "color")
     private Color hairColor;
 
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
 

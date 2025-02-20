@@ -1,5 +1,6 @@
 package org.onishkoff.itmo.IS1.util;
 
+import org.onishkoff.itmo.IS1.dto.login.LoginDto;
 import org.onishkoff.itmo.IS1.dto.login.RegisterResponseDto;
 import org.onishkoff.itmo.IS1.dto.model.request.*;
 import org.onishkoff.itmo.IS1.dto.model.response.*;
@@ -59,6 +60,7 @@ public class Mapper {
 
 
     public Person toPerson(PersonDtoRequest person) {
+        if(person == null) return null;
         return Person.builder()
                 .name(person.getName())
                 .eyeColor(person.getEyeColor())
@@ -207,5 +209,4 @@ public class Mapper {
                 .comment(adminRequest.getComment())
                 .build();
     }
-
 }

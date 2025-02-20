@@ -15,12 +15,15 @@ import org.onishkoff.itmo.IS1.model.*;
 import org.onishkoff.itmo.IS1.repository.DragonRepository;
 import org.onishkoff.itmo.IS1.util.Mapper;
 import org.onishkoff.itmo.IS1.util.SecurityUtil;
+import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +79,8 @@ public class DragonService {
         return rawPages.map(mapper::toDragonDto);
     }
 
+
+    @Retryable(value = CannotAcquireLockException.class, backoff = @Backoff(delay = 1000, multiplier = 2))
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public DragonDto createDragon(DragonDtoRequest dto) {
         dto.setOwner(securityUtil.getUserFromContext());
@@ -83,7 +88,11 @@ public class DragonService {
             dto.getDragonHead().setId(null);
         }
 
-        Dragon dragon = dragonRepository.save(mapper.toDragon(dto));
+        Dragon toUpdate = mapper.toDragon(dto);
+        if(dto.getPerson() != null){
+            toUpdate.setPerson(personService.findPersonById(dto.getPerson().getId()));
+        }
+        Dragon dragon = dragonRepository.save(toUpdate);
         return mapper.toDragonDto(dragon);
     }
 
@@ -92,8 +101,10 @@ public class DragonService {
         dragonRepository.deleteById(id);
     }
 
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
 
+    @Retryable(value = {CannotAcquireLockException.class},
+            backoff = @Backoff(delay = 1000, multiplier = 2))
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public DragonDto update(DragonDtoRequest dragonDto) {
         Coordinates coordinates = coordinateService.findCoordinatesById(dragonDto.getCoordinates().getId());
         coordinates.setX(dragonDto.getCoordinates().getX());
@@ -129,8 +140,11 @@ public class DragonService {
 
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Retryable(value = { CannotAcquireLockException.class },
+            backoff = @Backoff(delay = 1000, multiplier = 2))
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public UploadHistory fileUpload(MultipartFile file) {
+        UploadHistory result;
         try {
             UploadHistory uploadHistory = uploadHistoryService.createEmptyUpload();
             if (file.isEmpty() || file.getOriginalFilename() == null) {
@@ -143,7 +157,7 @@ public class DragonService {
             for (DragonDtoRequest dragonDto : dragonDtoList) {
                 Set<ConstraintViolation<DragonDtoRequest>> constraintViolations = validator.validate(dragonDto);
                 if (!constraintViolations.isEmpty()) {
-                    for(ConstraintViolation<DragonDtoRequest> constraintViolation : constraintViolations) {
+                    for (ConstraintViolation<DragonDtoRequest> constraintViolation : constraintViolations) {
                         System.out.println(constraintViolation.getMessage());
                     }
                     throw new ValidationException("Validation failed");
@@ -164,7 +178,7 @@ public class DragonService {
             uploadHistory.setObjectUrl(objectUrl);
             uploadHistory.setIsSuccess(Boolean.TRUE);
             uploadHistoryService.addNewUpload(uploadHistory);
-            return uploadHistory;
+            result = uploadHistory;
         } catch (ConnectException e) {
             System.out.println(1);
             uploadHistoryService.addBadUpload(UploadHistory.builder()
@@ -181,23 +195,24 @@ public class DragonService {
 
             uploadHistoryService.addBadUpload(
                     UploadHistory.builder()
-                    .objectUrl("")
-                    .user(securityUtil.getUserFromContext())
-                    .isSuccess(Boolean.FALSE)
-                    .build());
+                            .objectUrl("")
+                            .user(securityUtil.getUserFromContext())
+                            .isSuccess(Boolean.FALSE)
+                            .build());
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Failed to upload file: " + e.getMessage());
         }
+        return result;
     }
 
 
     public Map<String, Integer> groupDragonsByKiller() {
         List<Dragon> dragons = dragonRepository.findAll();
         Map<String, Integer> dragonsByKiller = new HashMap<>();
-        for(Dragon dragon : dragons) {
-            if(dragon.getPerson() == null) continue;
-            if(!dragonsByKiller.containsKey(dragon.getPerson().getName())) {
+        for (Dragon dragon : dragons) {
+            if (dragon.getPerson() == null) continue;
+            if (!dragonsByKiller.containsKey(dragon.getPerson().getName())) {
                 dragonsByKiller.put(dragon.getPerson().getName(), 1);
-            }else{
+            } else {
                 dragonsByKiller.put(dragon.getPerson().getName(), dragonsByKiller.get(dragon.getPerson().getName()) + 1);
             }
         }

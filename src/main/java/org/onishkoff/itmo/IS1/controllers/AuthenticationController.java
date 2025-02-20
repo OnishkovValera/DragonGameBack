@@ -32,6 +32,7 @@ public class AuthenticationController{
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Validated LoginDto loginDto){
+        System.out.println(loginDto);
         String token = authenticationService.authenticate(loginDto.getLogin(), loginDto.getPassword());
         return ResponseEntity.ok(LoginResponseDto.builder().token(token).build());
     }

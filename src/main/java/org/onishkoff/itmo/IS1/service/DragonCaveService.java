@@ -6,6 +6,8 @@ import org.onishkoff.itmo.IS1.exception.DragonCaveNotFoundException;
 import org.onishkoff.itmo.IS1.model.DragonCave;
 import org.onishkoff.itmo.IS1.repository.DragonCaveRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
