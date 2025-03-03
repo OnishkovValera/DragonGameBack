@@ -27,7 +27,6 @@ public class AuthenticationController{
     public ResponseEntity<RegisterResponseDto> register(@RequestBody @Validated RegisterDto registerDto){
         RegisterResponseDto dto = mapper.toRegisterResponseDto(authenticationService.register(registerDto));
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-
     }
 
     @PostMapping("/login")

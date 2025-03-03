@@ -78,7 +78,14 @@ public class GlobalExceptionController {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Нарушение целостности данных: " + ex.getMessage());
     }
+    
 
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail exceptionManager(Exception exception){
+        exception.printStackTrace();
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+
+    }
 
 
 }

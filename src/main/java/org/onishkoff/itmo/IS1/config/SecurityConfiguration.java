@@ -42,7 +42,6 @@ public class SecurityConfiguration {
     @Bean
     public UserDetailsService userDetailsService() {
         return login -> userRepository.findByLogin(login).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
     }
 
 
@@ -55,11 +54,13 @@ public class SecurityConfiguration {
         return authProvider;
     }
 
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-
     }
+
+
     @Order(1)
     @Bean
     public SecurityFilterChain securityFilterChainForAuthetication(HttpSecurity http) throws Exception{
